@@ -51,7 +51,7 @@ def run():
     st.set_page_config(
         page_title="Hyper-Personalized Marketing",
         page_icon="🎯",
-        layout='wide'
+        layout="centered"
     )
 
     st.write("# 🤖 Gen AI for Hyper-Personalized Marketing Messages 🎯")
