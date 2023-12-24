@@ -14,18 +14,48 @@
 
 import streamlit as st
 from streamlit.logger import get_logger
+import requests as r 
 
 LOGGER = get_logger(__name__)
+
+
+def dify(param, API_KEY, API_URL, MKTStrategy):
+    # Configure header with API key
+    headers = {
+        "Authorization": "Bearer " + API_KEY,
+        "Content-Type": "application/json"
+    }
+
+    params = param
+
+    query = f"Design a marketing message notification for Robinhood, the food delivery application. The marketing objective is to {MKTStrategy}."
+
+    response = r.post(API_URL, json={"query": query, "conversation_id": "", **params}, headers=headers)
+
+    if response.status_code == 200:
+        # Access the response data
+        data = response.json()
+
+        # # Extract conversation_id
+        # conversation_id = data["conversation_id"]
+
+        output = data 
+
+    else:
+        # Handle error
+        output = f"Error: ", response.status_code, response.reason
+
+    return output
 
 
 def run():
     st.set_page_config(
         page_title="Hyper-Personalized Marketing",
-        page_icon="👋",
+        page_icon="🎯",
         layout='wide'
     )
 
-    st.write("# Gen AI for Hyper-Personalized Marketing Messages 👋")
+    st.write("# 🤖 Gen AI for Hyper-Personalized Marketing Messages 🎯")
 
     # st.sidebar.success("Select a demo above.")
 
@@ -54,21 +84,58 @@ def run():
         Platform2 =  st.selectbox("The most food delivery apps (Rank 2)", ('GrabFood', 'LINEMAN Wongnai', 'Robinhood', 'Foodpanda', 'ShopeeFood'), index=None, placeholder='Choose an option')
         mbti =  st.selectbox("Myers-Briggs Type Indicator (MBTI) Personality type", ('ISTJ', 'ISFJ', 'INTJ', 'INFJ', 'ISTP', 'ISFP', 'INFP', 'INTP', 'ESTP', 'ESFP', 'ENFP', 'ENTP', 'ESTJ', 'ESFJ', 'ENFJ', 'ENTJ'), index=None, placeholder='Choose an option')
         Personality =  st.multiselect("Please select 3 sentences from the following that best describe you", ('You enjoy trying new things.', 'You are energetic and lively.', 'You are always prepared.', 'You are helpful and considerate.', 'You have a broad range of interests.', 'You are organized and efficient.', 'You are kind and compassionate.', 'You are talkative and outgoing.', 'You are easily worried.', 'You pay attention to details.', 'You are self-conscious and sensitive.'), max_selections=3, placeholder='Choose 3 options')
-        # Personality = 
+        Personality = ' '.join(Personality)
         OrderFrequency =  st.selectbox("Frequency of using food delivery apps", ('less than once a month', 'once a month', '2-3 times a month', '1-2 times a week', 'almost every day', 'only when having a promotion'), index=None, placeholder='Choose an option')
         aov =  st.selectbox('Average order value when ordering food delivery', ('less than 100 THB', '100 - 199 THB', '200 - 299 THB', '300 THB or more'), index=None, placeholder='Choose an option')
         PromoFrequency =  st.selectbox('How frequently do you use a promotion code or a special offer while placing an order?', ('always (100%)', 'often (75%)', 'sometimes (50%)', 'seldom (25%)', 'never (0%)'), index=None, placeholder='Choose an option')
         FoodDish =  st.multiselect('Favorite dishes or food categories when using food delivery apps', ('Cooked to Order', 'Chicken Rice', 'Japanese Food', 'Seafood', 'Salad & Healthy Food', 'Italian Food', 'Chinese Food', 'Somtum', 'Noodle', 'Burger & Fried Chicken', 'Coffee', 'Tea & Milk Tea', 'Sweets'), placeholder='Choose at least 3 options')
+        FoodDish = ', '.join(FoodDish)
         TimeWeekday =  st.multiselect('When are you likely to order on weekdays?', ('in the morning', 'at noon', 'in the afternoon', 'in the evening', 'at night', 'no order'), placeholder='(You can choose more than one)')
+        TimeWeekday = ', '.join(TimeWeekday)
         TimeWeekend =  st.multiselect('When are you likely to order on weekends?', ('in the morning', 'at noon', 'in the afternoon', 'in the evening', 'at night', 'no order'), placeholder='(You can choose more than one)')
+        TimeWeekend = ', '.join(TimeWeekend)
         OpenReadMKTMsg =  st.selectbox('How likely are you to open and read marketing messages from food delivery apps?', ('very unlikely', 'somewhat unlikely', 'neutral', 'somewhat likely', 'very likely'), index=None, placeholder='Choose an option')
         FavoriteMKT =  st.selectbox('What type of marketing messages from food delivery apps are you most likely to respond to?', ('Special menu price offers', 'Special delivery price offers', 'Special discount promotion code offers', 'New menu promotion'), index=None, placeholder='Choose an option')
         MKTFactor =  st.multiselect('What factors influence your decision to act upon a marketing message from a food delivery app?', ('The attractiveness of the offer', 'The relevance of the menu or cuisine', 'The credibility of the app', 'The urgency of the offer'), placeholder='(You can choose more than one)')
+        MKTFactor = ', '.join(MKTFactor)
 
-    st.subheader("Auto Gen-AI Message")
+    st.subheader("Auto Gen-AI Marketing Message")
     with st.container(border=True):
-        st.write("Here is an output from Generative AI")
-        st.write(st.secrets["dify_key"])
+        MKTStrategy = st.selectbox('The Marketing Strategy is to...', ('increase the frequency of purchases', 'increase the ticket size, order value, or item quantity'), index=None, placeholder='Choose an option')
+        
+        if st.button('Submit', type="primary"):
+        
+            st.write("Here is an output from Generative AI for marketing message via notification")
+            API_KEY = st.secrets["dify_key"]
+            # Define the API endpoint URL
+            API_URL = st.secrets["dify_url"]
+
+            param = {
+                "inputs": {
+                    "Name": Name,
+                    "Platform1": Platform1,
+                    "Platform2": Platform2,
+                    "Age": str(Age),
+                    "Gender": Gender,
+                    "Education": Education,
+                    "MBTI": mbti,
+                    "Personality": Personality,
+                    "OrderFrequency": OrderFrequency,
+                    "AOV": aov,
+                    "FoodDish": FoodDish,
+                    "OpenReadMktMsg": OpenReadMKTMsg,
+                    "TimeWeekday": TimeWeekday,
+                    "TimeWeekend": TimeWeekend,
+                    "PromoFrequency": PromoFrequency,
+                    "FavoriteMkt": FavoriteMKT,
+                    "MktFactor": MKTFactor,
+                    "MktStrategy": MKTStrategy
+                },
+                "response_mode": "blocking",
+                "user": Name
+            }
+
+            st.json(dify(param, API_KEY, API_URL, MKTStrategy))
 
 if __name__ == "__main__":
     run()
