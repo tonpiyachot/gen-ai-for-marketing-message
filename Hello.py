@@ -15,6 +15,7 @@
 import streamlit as st
 from streamlit.logger import get_logger
 import requests as r 
+import json
 
 LOGGER = get_logger(__name__)
 
@@ -35,9 +36,7 @@ def dify(param, API_KEY, API_URL, MKTStrategy):
     if response.status_code == 200:
         # Access the response data
         data = response.json()
-
-        # # Extract conversation_id
-        # conversation_id = data["conversation_id"]
+        data["answer"] = json.loads(data["answer"])
 
         output = data 
 
